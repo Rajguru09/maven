@@ -1,66 +1,36 @@
-pipeline {
-    agent any
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    tools {
-        maven 'Maven 3.6.3'  // Adjust the version as per your Jenkins Maven installation
-    }
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.example</groupId>
+    <artifactId>my-maven-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-    environment {
-        MAVEN_OPTS = '-Xmx1024m'
-    }
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-                sh 'ls -l'  // List files to verify if pom.xml is present
-            }
-        }
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-        stage('Build') {
-            steps {
-                // If the pom.xml is in a subdirectory
-                dir('project') {
-                    sh 'mvn clean install'
-                }
-            }
-        }
-
-        stage('Test') {
-            steps {
-                dir('project') {
-                    sh 'mvn test'
-                }
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                dir('project') {
-                    archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/*.jar', followSymlinks: false
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo "Deploying the artifact..."
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build and tests passed successfully!'
-        }
-
-        failure {
-            echo 'Build or tests failed.'
-        }
-
-        always {
-            cleanWs()
-        }
-    }
-}
-
+</project>
