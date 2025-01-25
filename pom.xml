@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven 3.6.3'  // Adjust the version as per your Jenkins Maven installation
+    }
+
+    environment {
+        MAVEN_OPTS = '-Xmx1024m'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                sh 'ls -l'  // List files to verify if pom.xml is present
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // If the pom.xml is in a subdirectory
+                dir('project') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('project') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                dir('project') {
+                    archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/*.jar', followSymlinks: false
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo "Deploying the artifact..."
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build and tests passed successfully!'
+        }
+
+        failure {
+            echo 'Build or tests failed.'
+        }
+
+        always {
+            cleanWs()
+        }
+    }
+}
+
